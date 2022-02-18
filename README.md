@@ -7,7 +7,7 @@ Lo primero es crear el proyecto desde laragon con "composer", correr el servidor
 - "composer require barryvdh/laravel-debugbar --dev" para meter una barra de control en el pie de la aplicación (una especie de consola con views, rutas, modelos, métodos, etc. -muy útil-), y "composer fund" para que se actualice todo.
 - "npm install" y "npm run dev" para otras dependencias.
 
-## Usando Laravel Base y Creando Posts de un Blog (Estático con elementos Dinámicos)
+## Usando Laravel Básico y Creando Posts de un Blog (Estático con elementos Dinámicos)
 
 Lo primero que debe estar claro es cómo funcionan las rutas dentro del framework, es sencillo:
 
@@ -44,6 +44,199 @@ Aunque ambas opciones son válidas, la segunda forma nos permite crear layouts d
 
 Una última modificación en esta parte del tutorial es cambiar la "validación" del Post::find que hay en web.php (que funciona) a una condicional en la propia función de la clase Post (cambiada a findOrFail), simplemente para mejorarla.
 
-## Conectando a la base de datos
+## Conectando a la base de datos (BRANCH)
 
 Antes de continuar, es necesario crear un repositorio Git y publicar el proyecto en Github, creando una primera rama del sitio estático antes de realizar la conexión a base de datos. Este proceso se hace desde la terminal como todos los proyectos realizados hasta la fecha, sin necesidad de crear un .gitignore porque lavarel lo trae por defecto.
+
+Entonces el repositorio (php-laravel-example) tendría:
+
+- Una rama general (branch:master) con el README.md del proyecto.
+- Una rama inicial (branch: basics-and-blades) con lo hecho hasta ahora.
+- Una nueva rama (branch: bbdd-mysql) para continuar con una mayor compartimentalización del proyecto (actual).
+
+### Conexión a MySQL
+
+Actuamos sobre el archivo .env (contemplado en el .gitignore para que sea privado) para modificar nombres y claves referentes a la conexión sobre la database. Después abrimos mysql por terminal con el usuario root y su contraseña (si la tiene), y creamos/usamos la base de datos cuyo nombre se refleja en ".env" (mismo que el proyecto).
+
+El primer paso es correr el comando "php artisan migrate", que crea varias tablas pre-establecidas en la base de datos. Si entramos en mysql y ordenamos "show tables;" se mostrarán en la consola. Para manejar la base de datos y hacer operaciones se usará la aplicación de escritorio TablePlus, creando una conexión con la base local podemos visualizar las tablas y todas sus características.
+
+### Migraciones y Modelos
+
+Si vamos a la carpeta "database/migrations" podemos ver los archivos correspondientes a nuestras tablas, con sus clase y métodos especificados dentro (up para correr la migración, down para revertirla). Si usamos el comando "php artisan" en la terminal obtenemos una lista de comandos, entre ellos varios con la sintaxis "migrate:-order-", muy útiles para manejar migraciones. Algunos vistos aquí son:
+
+- php artisan migrate:rollback
+- php artisan migrate
+- php artisan migrate:fresh (¡cuidado! si estás en producción se eliminarán todos los datos)
+
+Probamos a crear en la app una fila de datos en la tabla "users", sobre la cual también se pueden realizar múltiples operaciones (crear, eliminar, copiar sentencia, escribir sql...); y nos disponemos a editar un "Eloquent Model", que por ahora es la forma por defecto de laravel para interactuar con la database. En este caso la tabla "users" se corresponde con el modelo y clase "User", que ya está creada en app/Models, para más información buscar "Active Record Pattern".
+
+Para crear un nuevo user vemos en terminal:
+
+- php artisan tinker + $user = new App\Models\User; (o $user = new User;) + atributos(*)
+  - (*) $user->name = 'JeffreyWay';
+  - (*) $user->email = 'jeffrey@laracast.com';
+  - (*) $user->password = bcrypt('!password'); ->función de encriptado
+  - $user->save(); -> guardar en la base
+- Ahora podemos buscar al usuario/s en terminal mediante comandos, funciones o atributos (vídeo 19, minuto 4), incluso sacar las *colecciones* de datos que queramos con solo especificarlo.
+- Creamos otro user "Sally".
+  
+### Modelo Post
+
+El siguiente objetivo es transicionar a un Eloquent Model de Post, por lo que desechamos el archivo Post.php (de momento guardado en otra carpeta) y comenzamos con la migración (php artisan -> comandos "make" -> migrate y model) y creación del modelo en este orden:
+
+- php artisan make:migration create_posts_table (el nombre de la tabla siempre debe mostrar lo que ésta hace/es).
+- en "database/migrations" tendremos nuestro archivo de la migración con sintaxis básico que genera laravel.
+- aprovechando lo hecho en capítulos anteriores, descartamos la carpeta "posts" de resources ya que no hará más falta y los atributos que veíamos reflejados en los meta-datos de los html pasarán a ser variables o sentencias del archivo de la migración.
+- php artisan migrate para actualizar la base de datos
+- php artisan make:model Post -> se crea Post.php
+- al igual que se hizo con User, usando "php artisan tinker" creamos nuevos Posts ($post = new App\Models\Post;) e introducimos sus atributos (*)
+  - $post->title = 'My first Post';
+  - $post->excerpt = 'Lorem ipsum dolar sit amet.';
+  - $post->body = 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptates consectetur culpa numquam nesciunt tempora rerum, odio aliquam nostrum assumenda eaque sequi molestias molestiae adipisci accusamus natus explicabo deserunt, minima dignissimos!';
+  - $post->save();
+- podemos ver que todo está creado y en orden en TablePlus.
+
+Como ya había trabajo avanzado de los capítulos anteriores, nuestro archivo web.php no necesita muchos cambios, solamente cambiar lo que conocíamos como $slug al $id que genera la base de datos (y cambiarlo también en el balde de posts). Creamos un post más con el método explicado y corremos el servidor para comprobar que todo funciona bien.
+
+No obstante, al deshacernos de los html perdemos parte del estilo establecido que teníamos antes (márgenes, espaciado...), para lo que utilizamos la opción de "php artisan tinker" para *actualizar* los datos:
+
+- $post = App\Models\Post::first(); -> para entrar en el post que queramos, podíamos buscarlo por ejemplo por id también.
+- $post->body = '</p>' . $post->body . '</p>'; -> le digo a la base que esa columna está en html (también se podría md).
+- $post->save(); -> siempre necesario para la base de datos y, por tanto, lo que se ve en el navegador.
+- hacemos lo mismo con el otro post, esta vez por id -> $post = App\Models\Post::find(2); + los otros 2 comandos.
+
+Podemos hacer lo mismo con cualquier atributo/columna, incluso salvando la necesidad de poner siempre la ruta de Post:
+
+- use App\Models\Post;
+- $post = Post::first();
+- $post->title = 'My </strong>First</strong> Post'; -> hará falta cambiar el blade de post/s a sintaxis con html ({!!__!!})
+- $post->save();
+
+Tener en cuenta que para hacer todo este tipo de cambios es necesaria una seguridad de que hay control sobre los datos, y que no cualquiera puede modificarlos, o será peligroso que se pueda modificar la base tan fácilmente.
+
+### Formas de mitigar las vulnerabilidades de asignaciones masivas
+
+Hasta ahora se han introducido los datos en la base escribíendolos uno a uno en terminal, con los comandos indiviualizados, pero es posible hacerlo con uno general de la siguiente forma:
+
+- Post::create(['title' => 'My Third Post', 'excerpt' => 'excerpt of post', 'body' => 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptates consectetur culpa numquam nesciunt tempora rerum, odio aliquam nostrum assumenda eaque sequi molestias molestiae adipisci accusamus natus explicabo deserunt, minima dignissimos!']);
+- Pero esta secuencia nos provoca un error de MassAsignmentException que pide meter los datos de la forma anterior.
+- Entonces, lo necesario es ir a Post.php (el modelo) y añadir una propiedad que permita introducir los datos. Esto también tiene que ver con la seguridad por defecto, para no permitir la entrada de cualquier dato por cualquier usuario.
+  - "protected $fillable = ['title', 'excerpt', 'body'];"
+- Sin embargo, hay atributos como el id que se pueden saltar esa seguridad, lo que constituye una gran vulnerabilidad en las asignaciones masivas. Para evitarlo tenemos varias opciones:
+  - utilizar un "protected $guarded = ['id'];" que guardaría todo menos el id dado (cogería el siguiente natural).
+  - utilizar un "protected $guarded = [];" es decir, un array vacío que permitiría editar los datos (opción válida siempre que tengamos control sobre ellos).
+  - no utilizar asignaciones masivas para introducir los datos, de forma que nunca habrá esas vulnerabilidades.
+- Una vez elegida la opción que queramos, si hay uno de estas variables en vez de actualizar los datos de forma manual como antes podemos utilizar un método update: "$post->update(['excerpt' => 'excerpt changed'])" por ejemplo.
+
+### Enrutar el Modelo
+
+La función de web.php para obtener los posts actualmente captura el id y usa un método de la clase, pero lo óptimo sería que laravel supiera directamrnte que queremos un post pasándole esa variable. Esto se conoce como "route model binding" o "enlace de modelo de ruta".
+
+Lo más importante aquí es que el nombre de la wildcard {post} (lo que se pone en "get") coincida con la variable de la función, que en este caso es $post. Y esto funcionará sin mayor problema en principio porque el framework coge por defecto como identificador el id del post y la base de datos no devuelve ningún error; de hecho es la metodología más común de usar.
+
+No obstante, habrá situaciones donde en vez del id queramos identificar un eloquent model por un slug u otra columna de la tabla. Por ejemplo, si añadiéramos una *columna slug* a la tabla (especificándolo en el archivo de migración e introduciendo cada uno haciendo migrate:fresh y rehaciendo las filas de datos), la ruta del archivo web.php cambiaría a:
+
+Route::get('posts/{post:slug}', function (Post $post){
+    return view('post', [
+        'post' => $post
+    ]);
+});
+
+Y por supuesto en el blade de posts se tendría que volver a cambiar id por slug (visible en la url).
+
+Otra manera de hacer esto es implementar el Post.php un método "public function getRouteKeyName() {return 'slug';}" que devuelve el atributo que se le especifique a la función (sin necesidad de añadir "slug" a la wildcard, es decir, como si fuera a coger el id). Hace un tiempo esta era la única forma de conseguir el enrutamiento, pero ahora nos quedamos con la anterior opción.
+
+### Primera relación Eloquent
+
+Los posts de un blog se ordenan comúnmente en categorías mediante una relación entre ambos, así en un futuro podremos filtrar los posts de acuerdo con su categoría. Para hacer esta parte vamos a cambiar nuestros posts a ejemplos que podrían encontrarse en un blog real (family, work, hobby...), mismamente desde la app de TablePlus y commit los cambios. En la terminal se puede comprobar que todo sigue funcionando.
+
+Lo primero es crear una tabla y un modelo de las categorías como ya hicimos antes con los posts:
+
+- php artisan make:migration create_categories_table
+- php artisan make:model Category
+- (mix) se puede hacer todo de una con: "php artisan make:model Category -m" (m de migration).
+
+Obtenemos Model/Category y el php en database/migrations (este será el que editemos para especificar las columnas que queramos en nuestra tabla categories, igual que hicimos con posts, aunque de momento sólo serán slug y name).
+
+Además, es imprescindible que creemos una nueva columna en posts para que se corresponda con una categoría y poder asociar una tabla con la otra. En este caso será un simple "$table->foreignId('category_id');".
+
+Migramos de nuevo nuestras tablas con "php artisan migrate:fresh", pero si no queremos perder los datos de posts debemos copiar el código SQL desde TablePlus -> Copy As -> INSERT Statement y guardarlo (en un txt) para poder reusarlo más tarde. Por el momento usaremos el modelo elocuente que hemos instaurado en la aplicación para crear las primeras categorías:
+
+- use App\Models\Category;
+- $c = new Category;
+- $c->slug = 'personal';
+- $c->name = 'Personal';
+- $c->save();
+- lo mimso con Work y Hobbies
+
+Ahora podemos crear posts que pertenezcan a una categoría concreta (rescatar código sql para no tener que reescribir todo otra vez):
+
+- use App\Models\Post;
+- Post::create([
+    ... 'title' => 'My Family Post',
+    ... 'slug' => ''my-family-post',
+    ... 'excerpt' => 'excerpt of post',
+    ... 'body' => 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Voluptates consectetur culpa numquam nesciunt tempora rerum, odio aliquam nostrum assumenda eaque sequi molestias molestiae adipisci accusamus natus explicabo deserunt, minima dignissimos!',
+    ... 'category_id' => 1
+    ]);
+- podemos hacer lo mismo con los otros posts, uno por categoría, incluso los 3 a la vez con mass asignment (ver txt).
+- si vamos a TablePlus ahora podemos seleccionar los posts por categoría con una orden de sql: "select * from posts where category_id = ?;" (? = número)
+
+Aunque cada post tiene asignada una categoría, la relación todavía no está terminada, es necesario crear dicha función en Post.php, y por suerte laravel tiene por defecto varios métodos útiles para ello.
+
+- public function category() { return $this->belongsTo(Category::class); } -> nuestra primera relación elocuente
+- accediendo por terminal, hacer "$post->category;" (como propiedad, no como método) nos da los atributos correspondientes
+
+Por último, sólo queda modificar el blade de posts para incluir una referencia a la clase, de momento será un link sin destino que rescataremos próximamente.
+
+### Category Page y todos sus Posts
+
+Una vez asociados los posts y categorías, falta hacer una página de cada que muestre todos los posts asociados a ellas. Es decir, que haciendo click en la categoría se listen los posts de la misma.
+
+Parece que lo primero que necesitamos entonces es una ruta nueva en web.php (recordar que la wildcard y la variable deben coincidir). Después aprovechamos la función que creamos en Post.php y hacemos una parecida en Category.php, modificada porque la relación ya no será belongsTo sino hasMany.
+
+Ahora, si comprobamos por terminal los posts de una categoría no tendremos problema en recibirlos por pantalla:
+
+- php artisan tinker
+- App\Models\Category::first() -> muestra categoría
+- App\Models\Category::first()->posts; -> muestra las entradas
+
+Por supuesto aún faltan algunas modificaciones para que todo funcione: editar los dos blades para incluir las rutas a las categorías (primero probamos con el id pero luego nos quedamos mejor con el slug, y por tanto lo indicamos en la ruta).
+
+Cabe destacar un defecto de código que nos encontramos al hacer la ruta y su link de esta manera, es el llamado **problema N+1**: en posts.blade.php tenemos un loop foreach y dentro de él accedemos a una relación que todavía no se ha cargado, lo que se traducirá en una orden/ejecución extra de sql (query) por cada ítem del loop (y si se añaden más ítems, se sumarían las queries).
+
+Para hacer debug de sql y visualizar el problema el tutorial enseña un método manual y después recomienda la herramienta "clockwork" (composer require itsgoingd/clockwork + añadir extensión del navegador), que cumple la misma función.
+
+La solución al problema N+1 será modificar la ruta de get('/') de forma que "'posts' => Post::all()" se convierta en "'posts' => Post::with('category')->get()". Problem solved.
+
+### Añadir autores, seeding de la database, turbo boost con factories
+
+Cada vez es más común que un blog tenga varios editores o autores, y ese dato también debe mostrarse en los posts, quizás de la misma manera que la categoría y que sea un elemento más que al clicar nos devuelva unos resultados (los posts de ese autor). Pero para eso aún faltan algunas cosas.
+
+Primero, tenemos creado por defecto un php en migrations referido a la tabla users, pero todavía no hay relación ninguna con la de posts. Para hacela usaremos otra vez la foreignId como hicimos con categorías ("$table->foreignId('user_id');"). Como añadir esa línea nos añade una columna más en nuestra tabla posts, es necesario un "php artisan migrate:fresh" (mejor guardar el sql que ya tengamos para no rehacer todo de nuevo).
+
+#### Database Seeding y Relación Posts-Users
+
+Aquí es buen momento para hacer un inciso, ya que cada vez en más molesto perder los datos de las tablas cuando hay un cambio y tenemos que migrarlas de nuevo. Para arreglar esto se utiliza el llamado Database Seeding (siembra de la base de datos), yendo a database/seeders/DatabaseSeeder.php (podemos ver que hay una función "run" comentada, la activamos) y corriendo en la terminal el comando "php artisan db:seed" (siembra la base con records -> registros, en este caso con 10 porque es el número especificado en la función "run").
+
+En nuestro caso no necesitamos más que un usuario por el momento así que eliminamos los users creados y modificamos la función de DatabaseSeeder.php, importando los modelos y declarando funciones para crear contenido.
+
+Si probamos a hacer "php artisan db:seed" otra vez, funciona y obtenemos 1 autor y 3 categorías, pero nos topamos con el problema de que si repetimos el comando las filas se duplican porque en nigún momento especificamos que el nombre o slug debe ser único. Esto se declara en los php de migrations en cada una de las variables/columnas de la tabla (categories).
+
+Ahora podemos hacer el comando "php artisan migrate:fresh --seed", que hará 3 cosas en una: borrar las tablas, migrarlas de nuevo y hacer la siembra de datos. Pero, si hacemos "php artisan db:seed" de nuevo nos saltará un error por el intento de duplicación de datos, así que es necesario un método "truncate" al inicio de la función "run" para cada tabla que estemos sembrando, y problema solventado.
+
+Por terminar con otro añadido de datos, hacemos con posts lo mismo que con categorías para que el seeding incluya registros en esa tabla. Comprobamos en TablePlus y todo correcto, y si de nuevo queremos refrescar la base el comando "php artisan migrate:fresh --seed" nos la devolverá con los datos declarados.
+
+Antes de pasar a las factories, conviene dejar hecha la relación elocuente entre posts y users, ya que ahora están unidos por esa columna de id. Una vez hecho podemos encontrar cuanquiera de ellos por comandos de "php artisan tinker" en terminal.
+
+- En Post.php -> nueva función pública, método belongsTo.
+- En User.php -> nueva función pública, método hasMany (el inverso del otro).
+
+El ultimo paso es ir a post.blade.php y hacer dinámico el link para acceder al autor. Correr "php artisan db:seed" y listo.
+#### Turbo Boost with Factories
+
+#### Ver todos los Posts de un Autor
+
+### Final de Capítulo: Cargar Relaciones en un Modelo Existente
+
+*Vídeos vistos del tutorial*: **30/70**

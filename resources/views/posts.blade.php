@@ -4,9 +4,14 @@
         <article>
             <h2>
                 <a href="/posts/{{ $post->slug }}">
-                    {{ $post->title }}
+                    {!! $post->title !!}
                 </a>
             </h2>
+
+            <p>
+                <!-- <a href="/categories/{{ $post->category->id }}">{{ $post->category->name }}</a> -->
+                <a href="/categories/{{ $post->category->slug }}">{{ $post->category->name }}</a>
+            </p>
 
             <div>
                 {{ $post->excerpt }}

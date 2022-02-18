@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Spatie\YamlFrontMatter\YamlFrontMatter;
@@ -18,7 +19,7 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 |
 */
 
-Route::get('/', function () {
+// Route::get('/', function () {
 
     // $document = YamlFrontMatter::parseFile(resource_path('posts/my-fourth-post.html'));
 
@@ -52,22 +53,43 @@ Route::get('/', function () {
     // ddd($posts);
 
     // $posts = Post::all();
+
+//     return view('posts', [
+//         'posts' => Post::all()
+//     ]);
+// });
+
+// RUTA FINAL CON SOLUCIÓN AL PROBLEMA N+1
+Route::get('/', function () {
     return view('posts', [
-        'posts' => Post::all()
+        'posts' => Post::with('category')->get()
     ]);
 });
 
+// Route::get('posts/{post}', function ($id) {
 
-Route::get('posts/{post}', function ($slug) {
+//     // el objetivo es encontrar el post mediante un slug y pasarlo a una vista "post"
 
-    // el objetivo es encontrar el post mediante un slug y pasarlo a una vista "post"
+//     // $post = Post::find($slug);
+//     // return view('post', ['post' => $post]);
 
-    // $post = Post::find($slug);
-    // return view('post', ['post' => $post]);
+//     return view('post', [
+//         'post' => Post::findOrFail($id)
+//     ]);
 
+// });
+// // ->where('post', '[A-z_\-]+');
+
+// ROUTE MODEL BINDING (primero id, cambiado a slug)
+Route::get('posts/{post:slug}', function (Post $post){
     return view('post', [
-        'post' => Post::findOrFail($slug)
+        'post' => $post
     ]);
-
 });
-// ->where('post', '[A-z_\-]+');
+
+// ELOQUENT RELATIONSHIP AGAIN
+Route::get('categories/{category:slug}', function (Category $category){
+    return view('posts', [
+        'posts' => $category->posts
+    ]);
+});
