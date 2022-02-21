@@ -233,9 +233,39 @@ Antes de pasar a las factories, conviene dejar hecha la relación elocuente entr
 - En User.php -> nueva función pública, método hasMany (el inverso del otro).
 
 El ultimo paso es ir a post.blade.php y hacer dinámico el link para acceder al autor. Correr "php artisan db:seed" y listo.
+
 #### Turbo Boost with Factories
 
+Dentro del directorio database/, nos hemos familiarizado con las carpetas migrations/ y seeders/, pero también hay una de factories/ con un archivo por defecto para la UserFactory, que contiene una función de definición con unos atributos codificados para devolver datos inventados, lo que es muy útil para el testeo de la aplicación. Lo que hacemos en DatabaseSeeder es llamar a la factory para que cree al User falso.
+
+Podemos crear todos los users que queramos por terminal:
+
+- php artisan tinker
+- App\Models\User::factory()->create();
+- App\Models\User::factory(20)->create(); //crea 20 de golpe//
+
+Vemos que todo funciona bien, pero obviamente nos encontramos con que ni Post ni Category tienen Factories, así que las creamos y les damos el mismo formato que a la de User -> php artisan make:factory PostFactory / CategoryFactory + atributos de cada modelo con los elementos falsos que tienen que devolver.
+
+**Nota**: para futuros proyectos, es útil saber que las migraciones, seeders, factories etc., además de sus comandos específicos también se pueden crear desde el modelo. Si creáramos un elemento más aquí, cometarios por ejemplo, podríamos hacer simplemente "php artisan make:model Comment -mf" (migration and factory)
+
+Si no nos importa borrar los datos, corremos "php artisan migrate:fresh" para que se limpien las tablas, y en cuanto demos una orden de crear se generarán los datos sin problema. Por ejemplo:
+
+- php artisan tinker
+- App\Models\Post::factory()->create();
+
+Por último, sólo falta limpiar el código de DatabaseSeeder, puesto que ya no es necesaria la sintaxis para introducir manualmente los datos en las columnas de las tablas.
+
+- La función "run" pasa de tener un montón de líneas a una sola: "Post::factory()->create();".
+- Corremos "php artisan db:seed" y funciona.
+- Cuando eliminamos las funciones truncate, corremos "php artisan migrate:fresh --seed" y sigue funcionando todo.
+- Cambiamos a "Post::factory(5)->create();" -> el número de posts que queramos.
+- Otra vez "php artisan migrate:fresh --seed".
+
+El proceso es el mismo para los otros modelos, y si quisiéramos que ciertos datos fueran establecidos y no generados aleatoriamente, también es posible (ver DatabaseSeeder). De hecho, ahora tenemos un sólo usuario con 5 posts.
+
 #### Ver todos los Posts de un Autor
+
+Tras todas estas funcionalidades de nuestro blog, lo que queda es poder clicar en un usuario o autor y que se nos muestren todos los posts escritos por el mismo.
 
 ### Final de Capítulo: Cargar Relaciones en un Modelo Existente
 
