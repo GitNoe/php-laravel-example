@@ -7,7 +7,7 @@ Lo primero es crear el proyecto desde laragon con "composer", correr el servidor
 - "composer require barryvdh/laravel-debugbar --dev" para meter una barra de control en el pie de la aplicación (una especie de consola con views, rutas, modelos, métodos, etc. -muy útil-), y "composer fund" para que se actualice todo.
 - "npm install" y "npm run dev" para otras dependencias.
 
-## Usando Laravel Básico y Creando Posts de un Blog (Estático con elementos Dinámicos)
+## Laravel Básico y Posts de un Blog (Estático con elementos Dinámicos)
 
 Lo primero que debe estar claro es cómo funcionan las rutas dentro del framework, es sencillo:
 
@@ -265,8 +265,34 @@ El proceso es el mismo para los otros modelos, y si quisiéramos que ciertos dat
 
 #### Ver todos los Posts de un Autor
 
-Tras todas estas funcionalidades de nuestro blog, lo que queda es poder clicar en un usuario o autor y que se nos muestren todos los posts escritos por el mismo.
+Tras todas estas funcionalidades de nuestro blog, lo que queda es poder clicar en un usuario o autor y que se nos muestren todos los posts escritos por el mismo. Pero antes hacemos un pequeño cambio en web.php para que los posts más recientes se vean los primeros en la página.
+
+Bien, lo indicado ahora es que los posts se correspondan con un autor en vez de un usuario, por lo que hay que cambiar esa variable de alguna forma. Como estamos usando laravel (que asume ciertos parámetros de sintaxis) no es posible hacer esto simplemente cambiando el nombre de la función o el atributo, es necesario indicarle que la llave foránea de la tabla sigue siendo user_id. Además se cambia user por author en la vista blade de post, y se añade el autor en la página de todos los posts.
+
+Aquí volvemos a encontrarnos con el **problema N+1**, pero lo solucionamos en web.php como la otra vez, incluyendo author al igual que hicimos con category.
+
+Ahora sí que estamos preparados para crear una página que despliegue los posts de cada autor.
+
+- Ruta en web.php
+- Links en blades
+
+En principio indicamos que se recoja el id del autor como identificador, así que es lo que se ve en la url del blog, pero lo mejor sería mostrar un nombre de usuario reconocible porque el lector podría buscarlo directamente. Así que vamos al php de la migración de users y añadimos la columna "username" para utilizarla en estos términos (también añadirla en UserFactory).
+
+Hacemos "php artisan migrate:fresh --seed" y tenemos nuestros datos actualizados. Cambiamos id por username en los blades y añadimos el atributo en web.php, y listo.
 
 ### Final de Capítulo: Cargar Relaciones en un Modelo Existente
+
+Echemos un vistazo a alguna de las categorías. Si solo tenemos un post en ella, creamos algunos más:
+
+- php artisan tinker
+- App\Models\Post::factory(10)->create(['category_id' => 1]);
+
+Si nos fijamos con la herramienta clockwork mencionada anteriormente, volvemos a tener el **problema N+1** en las categorías (y en authors), ya que las relaciones se han hecho en modelos existentes. Para arreglarlo nos vamos de nuevo a web.php y usamos el método load, que rebaja considerablemente el número de queries que se van a enviar y recibir.
+
+Otra forma de conseguir esto es indicar que cada vez que pedimos un post siempre se incluyan la categorís y el autor como parte del resultado, se puede hacer mediante la propiedad "with" declarándola en Post.php y después modificando web.php (donde teniamos repetido varias veces el array de categoría y autor ya no hace falta).
+
+Si bien este método funciona muy bien, no siempre querremos utilizarlo porque dependerá de las relaciones que se cargan (o no). Selectivamente podemos desmarcar alguno de esos resultados con el método "without".
+
+Las opciones son innumerables y se pueden hacer muchas más cosas pero hasta esta fase lo dejaremos así.
 
 *Vídeos vistos del tutorial*: **30/70**

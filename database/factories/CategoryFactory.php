@@ -24,7 +24,7 @@ class CategoryFactory extends Factory
     {
         return [
             'slug' => $this->faker->slug(),
-            'name' => $this->faker->word,
+            'name' => $this->faker->word(),
         ];
     }
 }

@@ -17,6 +17,9 @@ class Post extends Model
     // explicado en el readme
     protected $guarded = [];
 
+    // PROPIEDAD PARA REDUCIR EL NÚMERO DE QUERIES - CARGAR RELACIONES ÓPTIMAMENTE
+    protected $with = ['category', 'author'];
+
     public function category()
     {
         // función para la relación elocuente entre posts y categories
@@ -26,11 +29,12 @@ class Post extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function user()
+    public function author() //antes era user
     {
         // función para la relación elocuente entre posts y users
         // e principio, cada post pertenecerá a una persona o usuario
 
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+        // declarar la columna a la que se refiere o laravel intentará buscar author_id
     }
 }

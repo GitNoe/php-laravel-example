@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Support\Facades\File;
@@ -62,7 +63,9 @@ use Spatie\YamlFrontMatter\YamlFrontMatter;
 // RUTA FINAL CON SOLUCIÓN AL PROBLEMA N+1
 Route::get('/', function () {
     return view('posts', [
-        'posts' => Post::with('category')->get()
+        // latest = más reciente primero
+        // 'posts' => Post::latest()->with(['category', 'author'])->get()
+        'posts' => Post::latest()->get()
     ]);
 });
 
@@ -90,6 +93,16 @@ Route::get('posts/{post:slug}', function (Post $post){
 // ELOQUENT RELATIONSHIP AGAIN
 Route::get('categories/{category:slug}', function (Category $category){
     return view('posts', [
+        // 'posts' => $category->posts->load(['category', 'author']) //load por el modelo existente
         'posts' => $category->posts
+    ]);
+});
+
+// POSTS DE UN AUTOR
+Route::get('authors/{author:username}', function (User $author){
+    // dd($author);
+    return view('posts', [
+        // 'posts' => $author->posts->load(['category', 'author']) //load por el modelo existente
+        'posts' => $author->posts
     ]);
 });

@@ -28,9 +28,9 @@ class PostFactory extends Factory
             'user_id' => User::factory(), //se corresponde a uno "real", de los que hay en la bbdd
             'category_id' => Category::factory(), //igual
             'slug' => $this->faker->slug(),
-            'title' => $this->faker->sentence,
-            'excerpt' => $this->faker->sentence,
-            'body' => $this->faker->paragraph,
+            'title' => $this->faker->sentence(),
+            'excerpt' => $this->faker->sentence(),
+            'body' => $this->faker->paragraph(),
         ];
     }
 }
