@@ -1,6 +1,10 @@
 <x-layout>
+    <div>
+        <h1>Página Principal de Posts</h1>
+    </div>
+    <div class="grid-container">
+        @foreach ($posts as $post)
 
-    @foreach ($posts as $post)
         <article>
             <h2>
                 <a href="/posts/{{ $post->slug }}">
@@ -14,9 +18,10 @@
             </p>
 
             <div>
-                {{ $post->excerpt }}
+                <p>{{ $post->excerpt }}</p>
             </div>
         </article>
-    @endforeach
 
+        @endforeach
+    </div>
 </x-layout>

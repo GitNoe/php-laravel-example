@@ -1,22 +1,38 @@
 body{
     background: white;
     color: 22222;
-    max-width: 600px;
+    max-width: 1000px;
     margin: auto;
     font-family: sans-serif;
 }
 
+h1{
+    text-align: center;
+    margin-top: 1rem;
+    text-decoration: underline;
+}
 h2{
+    margin-top: o.5rem;
     text-align: center;
     font-weight: normal;
+    font-size: 1.3em;
+    margin-left: 1rem;
 }
 
 p{
     line-height: 1.7;
+    margin-left: 1rem;
 }
 
-article + article{
-    margin-top: 3rem;
-    padding-top: 3rem;
-    border-top: 1px solid #c5c5c5;
+.grid-container{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /*responsive*/
+    grid-gap: 1em; /*distancia entre elemento del grid*/
+}
+
+article, article + article{
+    margin-top: 1rem;
+    padding-top: 1rem;
+    padding-right: 1rem;
+    border: 1px solid #c5c5c5;
 }

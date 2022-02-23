@@ -296,3 +296,5 @@ Si bien este método funciona muy bien, no siempre querremos utilizarlo porque d
 Las opciones son innumerables y se pueden hacer muchas más cosas pero hasta esta fase lo dejaremos así.
 
 *Vídeos vistos del tutorial*: **30/70**
+
+## Integrando el diseño

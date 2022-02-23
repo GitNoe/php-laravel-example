@@ -1,5 +1,7 @@
 <x-layout>
-
+    <div>
+        <h1>Página de Post Individual</h1>
+    </div>
     <article>
         <h2>
             {!! $post->title !!}
@@ -10,7 +12,7 @@
         </p>
 
         <div>
-            {!! $post->body !!}
+            <p>{!! $post->body !!}</p>
             <!-- las exclamaciones son para traducir el html puro -->
         </div>
     </article>
