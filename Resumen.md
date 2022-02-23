@@ -74,3 +74,11 @@ En este punto se han visualizado y reproducido 30 vídeos del tutorial de larave
 - Uso de terminal de laragon y de php artisan para comandos.
 - Comentario y documentación constante de código a medida que se avanzaba en el tutorial.
 - Implementación de un estilo css simple para la presentación del blog, ya que no se ha llegado a desarrollar los estilos del tutorial.
+
+## Algunas capturas del blog
+
+Página de todos los posts ordenados con un grid:
+![Posts](public/captures/pagposts.png)
+
+Página de un post individual:
+![Post](public/captures/post.png)
