@@ -22,7 +22,7 @@ Al principio, el blog se construye con una serie de archivos html estáticos que
 
 Para tener un blog dinámico, el primer paso es crear una clase Post (en app/Models/) que se encargará de recoger todas las funciones que se le quieran dar a ese elemento, como la de encontrar los posts. Además se cambia la forma de enrutar en web.php y se deben modificar las vistas para que también sean dinámicas y respondan a la clase. Aún así todavía se utilizan los archivos html para imprimir los posts por pantalla, es decir, todavía hay elementos estáticos en la programación, pero ya se han separado los meta-datos de su contenido.
 
-La forma de simplificar las vistas es usar el formato **blade**, que funciona como templates y trae muchas opciones de sintaxis y componentes que facilitan la construciión de las páginas. Laravel traduce blade a php vainilla e incluso guarda esa información en los archivos de la carpeta storage/framework/views.
+La forma de simplificar las vistas es usar el formato **blade**, que funciona como templates y trae muchas opciones de sintaxis y componentes que facilitan la construcción de las páginas. Laravel traduce blade a php vainilla e incluso guarda esa información en los archivos de la carpeta storage/framework/views.
 
 Los blades se encuentran dentro de resources/views, y es recomendable tener también una carpeta de componentes (como los de js) donde se pueden agrupar elementos html que funcionen como plantillas. En el caso de este blog se crea un layout.blade.php para que sea el esqueleto de la app, ahí se referencian todos los estilos o scripts. Como archivos principales se encuentran posts.blade.php (listado) y post.blade.php (artículos individuales).
 
@@ -44,7 +44,7 @@ Volviendo a los Modelos, la primera relación elocuente se realiza entre las cla
 
 El próximo paso es hacer una página donde se vean todos los posts de una categoría, para lo que se crea una ruta nueva en web.php y la función indicada en la clase Category. Añadido a la modificación de los blades se obtiene todo lo necesario para esta funcionalidad.
 
-Llegados a este punto se encuentra el **problema N+1**, es un defecto de código por el cual se producen demasiadas queries desde la base de datos, pero se soluciona modificando la sintaxis de la ruta.
+Llegados a este punto se encuentra el **problema N+1**, es un defecto de código por el cual se producen demasiadas queries desde la base de datos, pero se soluciona modificando la sintaxis de la ruta en web.php.
 
 Otro punto es que no existe una relación directa entre las tablas users y posts, así que se crea igual que la de categorías (esta vez columna user_id) y se refrescan las migraciones. La relación también debe ser elocuente así que se declaran las funciones pertienetes en las clases de los modelos.
 
@@ -56,7 +56,7 @@ El archivo database/seeders/DatabaseSeeder.php contiene funciones para sembrar l
 
 Aunque el Seeding es muy práctico para introducir datos en masa, estos todavía deben escribirse manualmente y suponen un gasto de tiempo considerable. Para evitar esto se utilizan las Factories, archivos que se corresponden a los modelos del blog y que contienen una función que devuelve datos generados aleatoriamente, algo muy útil para el testeo del blog.
 
-Entonces, lo que se hace en DatabaseSeeder es llamar a la factory para que creen los atributos falsos. Se limpia la sintaxis manual anterior y tooo funciona correctamente.
+Entonces, lo que se hace en DatabaseSeeder es llamar a la factory para que creen los atributos falsos. Se limpia la sintaxis manual anterior y todo funciona correctamente.
 
 ## Posts de un Autor y Cargar Relaciones
 
@@ -64,7 +64,7 @@ Al igual que con las categorías, un blog suele tener la opción de clicar en un
 
 Por último se añade una nueva columna "username" para que la url del blog muestre al autor y no el id por defecto, tanto en la migración como en la factory.
 
-Las relaciones autor-post y categoría-post, al hacerse en modelos ya existentes, vuelven a presentar el problema N+1, por lo que se deben modificar las rutas de web.php para solventarlo. Otra forma de hacerlo es declarar la variable protegida $with en las clases y usar el método en las rutas.
+Las relaciones autor-post y categoría-post, al hacerse en modelos ya existentes, vuelven a presentar el problema N+1, por lo que se deben modificar las rutas de web.php para solventarlo. Otra forma de hacerlo es declarar la variable protegida $with en las clases y usar el mismo método en las rutas.
 
 En este punto se han visualizado y reproducido 30 vídeos del tutorial de laravel. Para un desglose más extenso dirigirse al README del proyecto.
 
@@ -73,4 +73,4 @@ En este punto se han visualizado y reproducido 30 vídeos del tutorial de larave
 - Uso de Git y GitHub para la creación de un repositorio remoto con varias ramas en las que se han dividido los contenidos del ejercicio.
 - Uso de terminal de laragon y de php artisan para comandos.
 - Comentario y documentación constante de código a medida que se avanzaba en el tutorial.
-- 
+- Implementación de un estilo css simple para la presentación del blog, ya que no se ha llegado a desarrollar los estilos del tutorial.
